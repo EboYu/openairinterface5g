@@ -362,6 +362,10 @@ static int _emm_as_recv(nas_user_t *user, const char *msg, int len,
   case DETACH_ACCEPT:
     rc = emm_recv_detach_accept(user, &emm_msg->detach_accept, emm_cause);
     break;
+  //add by yinbo  
+  case ATTACH_REJECT:
+    rc = emm_recv_attach_reject(user, &emm_msg->attach_reject, emm_cause);
+    break;
 
 
   case TRACKING_AREA_UPDATE_ACCEPT:

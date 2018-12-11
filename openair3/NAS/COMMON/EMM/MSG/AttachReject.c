@@ -78,6 +78,7 @@ int encode_attach_reject(attach_reject_msg *attach_reject, uint8_t *buffer, uint
   int encoded = 0;
   int encode_result = 0;
 
+  //attach_reject->emmcause = 11;
   /* Checking IEI and pointer */
   CHECK_PDU_POINTER_AND_LENGTH_ENCODER(buffer, ATTACH_REJECT_MINIMUM_LENGTH, len);
 

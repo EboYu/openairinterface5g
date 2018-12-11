@@ -98,6 +98,8 @@ int emm_recv_status(unsigned int ueid, emm_status_msg *msg, int *emm_cause)
    * Message checking
    */
   *emm_cause = EMM_CAUSE_SUCCESS;
+
+  LOG_TRACE(INFO, "EMMAS-SAP - R Received EMM Status message (message type=%d, cause=%d)", msg->messagetype, msg->emmcause);
   /*
    * Message processing
    */

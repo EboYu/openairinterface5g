@@ -506,6 +506,51 @@ int emm_proc_attach_reject(nas_user_t *user, int emm_cause, const OctetString *e
   LOG_TRACE(INFO, "EMM-PROC  - Stop timer T3410 (%d)", emm_timers->T3410.id);
   emm_timers->T3410.id = nas_timer_stop(emm_timers->T3410.id);
 
+  /*Moving the below code here to address the null pointer problem--yyb*/
+  /* Update "forbidden lists" */
+  switch (emm_cause) {
+  case EMM_CAUSE_PLMN_NOT_ALLOWED:
+  case EMM_CAUSE_NOT_AUTHORIZED_IN_PLMN:
+    /* Store the PLMN identity in the "forbidden PLMN list" */
+    // if((user->emm_data->splmn.MNCdigit3 &0xf) == 0xf)
+    //  LOG_TRACE(INFO,"Store the PLMN identity %X%X%X:%X%X in its forbidden PLMN list", 
+    //   user->emm_data->splmn.MCCdigit1, user->emm_data->splmn.MCCdigit2, user->emm_data->splmn.MCCdigit3,
+    //      user->emm_data->splmn.MNCdigit1, user->emm_data->splmn.MNCdigit2);
+    // else
+    LOG_TRACE(INFO,"Store the PLMN identity %X%X%X:%X%X%X in its forbidden PLMN list", 
+      user->emm_data->splmn.MCCdigit1, user->emm_data->splmn.MCCdigit2, user->emm_data->splmn.MCCdigit3,
+         user->emm_data->splmn.MNCdigit1, user->emm_data->splmn.MNCdigit2, user->emm_data->splmn.MNCdigit3);
+    user->emm_data->fplmn.plmn[user->emm_data->fplmn.n_plmns++] = user->emm_data->splmn;
+    break;
+
+  case EMM_CAUSE_TA_NOT_ALLOWED:
+    /* Store the current TAI in the list of "forbidden tracking
+     * areas for regional provision of service" */
+
+    LOG_TRACE(INFO,"Store the current track area code %d in the list of forbidden tracking areas for regional provision of service", user->emm_data->tac);
+    user->emm_data->ftai.tai[user->emm_data->ftai.n_tais++] = *user->emm_data->tai;
+    break;
+
+  case EMM_CAUSE_ROAMING_NOT_ALLOWED:
+    /* Store the current TAI in the list of "forbidden tracking
+     * areas for roaming" */
+    LOG_TRACE(INFO, "Store the current track area code %d in the list of forbidden tracking areas for roaming", user->emm_data->tac);
+    user->emm_data->ftai_roaming.tai[user->emm_data->ftai_roaming.n_tais++] = *user->emm_data->tai;
+    break;
+
+  case EMM_CAUSE_EPS_NOT_ALLOWED_IN_PLMN:
+    /* Store the PLMN identity in the "forbidden PLMNs for GPRS
+     * service" list */
+    LOG_TRACE(INFO,"Store the PLMN identity %X%X%X:%X%X%X in the forbidden PLMNs for GPRS service list", 
+      user->emm_data->splmn.MCCdigit1, user->emm_data->splmn.MCCdigit2, user->emm_data->splmn.MCCdigit3,
+         user->emm_data->splmn.MNCdigit1, user->emm_data->splmn.MNCdigit2, user->emm_data->splmn.MNCdigit3);
+    user->emm_data->fplmn_gprs.plmn[user->emm_data->fplmn_gprs.n_plmns++] = user->emm_data->splmn;
+    break;
+
+  default :
+    break;
+  }
+
   /* Update the EPS update status, the GUTI, the visited registered TAI and
    * the eKSI */
   switch (emm_cause) {
@@ -584,36 +629,6 @@ int emm_proc_attach_reject(nas_user_t *user, int emm_cause, const OctetString *e
     /* 3GPP TS 24.301, section 5.5.1.2.6, case d
      * Set the attach attempt counter to 5 */
     emm_attach_data->attempt_count = EMM_ATTACH_COUNTER_MAX;
-    break;
-
-  default :
-    break;
-  }
-
-  /* Update "forbidden lists" */
-  switch (emm_cause) {
-  case EMM_CAUSE_PLMN_NOT_ALLOWED:
-  case EMM_CAUSE_NOT_AUTHORIZED_IN_PLMN:
-    /* Store the PLMN identity in the "forbidden PLMN list" */
-    user->emm_data->fplmn.plmn[user->emm_data->fplmn.n_plmns++] = user->emm_data->splmn;
-    break;
-
-  case EMM_CAUSE_TA_NOT_ALLOWED:
-    /* Store the current TAI in the list of "forbidden tracking
-     * areas for regional provision of service" */
-    user->emm_data->ftai.tai[user->emm_data->ftai.n_tais++] = *user->emm_data->tai;
-    break;
-
-  case EMM_CAUSE_ROAMING_NOT_ALLOWED:
-    /* Store the current TAI in the list of "forbidden tracking
-     * areas for roaming" */
-    user->emm_data->ftai_roaming.tai[user->emm_data->ftai_roaming.n_tais++] = *user->emm_data->tai;
-    break;
-
-  case EMM_CAUSE_EPS_NOT_ALLOWED_IN_PLMN:
-    /* Store the PLMN identity in the "forbidden PLMNs for GPRS
-     * service" list */
-    user->emm_data->fplmn_gprs.plmn[user->emm_data->fplmn_gprs.n_plmns++] = user->emm_data->splmn;
     break;
 
   default :

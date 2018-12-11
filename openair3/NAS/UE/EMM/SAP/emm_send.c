@@ -768,7 +768,7 @@ int emm_send_authentication_response(const emm_as_security_t *msg,
                                      authentication_response_msg *emm_msg)
 {
   int size = EMM_HEADER_MAXIMUM_LENGTH;
-
+  LOG_TRACE(INFO, "Hello, world!");
   LOG_TRACE(INFO, "EMMAS-SAP - Send Authentication Response message");
 
   /* Mandatory - Message type */
